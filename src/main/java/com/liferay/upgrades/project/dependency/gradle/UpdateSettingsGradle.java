@@ -1,6 +1,9 @@
 package com.liferay.upgrades.project.dependency.gradle;
 
-import java.io.File;
+import com.liferay.upgrades.project.dependency.Step;
+import com.liferay.upgrades.project.dependency.model.Context;
+import com.liferay.upgrades.project.dependency.model.VersionOptions;
+
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,14 +14,18 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class UpdateSettingsGradle {
+public class UpdateSettingsGradle implements Step {
 
-    public String run(String directory, String newVersion) throws Exception {
+    @Override
+    public Context applyChanges(VersionOptions stepOptions) throws Exception {
+        String newVersion = stepOptions.pluginsVersion;
+        String directory = stepOptions.directory;
 
         Path path = Paths.get(directory, "settings.gradle");
 
         if (!Files.exists(path)) {
-            throw new FileNotFoundException("settings.gradle not found at: " + path.toAbsolutePath());
+            throw new FileNotFoundException(
+                "settings.gradle not found at: " + path.toAbsolutePath());
         }
 
         List<String> lines = Files.readAllLines(path);
@@ -28,8 +35,10 @@ public class UpdateSettingsGradle {
         String oldVersion = "legacy";
 
         boolean found = false;
+        boolean changed = false;
 
-        Pattern pattern = Pattern.compile("name:\\s*[\"']" + _pluginId + "[\"'].*version:\\s*[\"'](.*?)[\"']");
+        Pattern pattern = Pattern.compile(
+            "name:\\s*[\"']" + _pluginId + "[\"'].*version:\\s*[\"'](.*?)[\"']");
 
         for (String line: lines) {
             Matcher matcher = pattern.matcher(line);
@@ -38,7 +47,11 @@ public class UpdateSettingsGradle {
                 oldVersion = matcher.group(1);
 
                 if (oldVersion.equals(newVersion)) {
-                    _log.info(String.format("%s is already %s. Skipping update.", _pluginId, newVersion));
+                    _log.info(
+                        String.format(
+                            "%s is already %s. Skipping update.", _pluginId,
+                            newVersion));
+
                     return null;
                 }
 
@@ -46,21 +59,48 @@ public class UpdateSettingsGradle {
                 updatedLines.add(updatedLine);
 
                 found = true;
-                _log.info("Updated " + _pluginId + " from " + oldVersion + " to " + newVersion);
+                changed = true;
+                _log.info(
+                    "Updated " + _pluginId + " from " + oldVersion + " to " +
+                        newVersion);
             } else {
                 updatedLines.add(line);
             }
         }
 
-        if (found) {
+        if (changed) {
             Files.write(path, updatedLines);
-        } else {
-            _log.warning("Could not find the workspace plugin definition in settings.gradle.");
+
+            return new Context(
+                stepOptions.ticket, null, directory, null, null, oldVersion,
+                null, newVersion);
+        } else if (!found) {
+            _log.warning(
+                "Could not find the workspace plugin definition in " +
+                    "settings.gradle.");
         }
 
-        return oldVersion;
+        return null;
     }
 
-    private static final Logger _log = Logger.getLogger(UpdateSettingsGradle.class.getName());
-    private static final String _pluginId = "com.liferay.gradle.plugins.workspace";
+    @Override
+    public String commitMessage(Context context) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(context.ticket());
+        sb.append(" Update com.liferay.gradle.plugins.workspace from ");
+        sb.append(context.oldVersion());
+        sb.append(" to ");
+        sb.append(context.pluginsVersion());
+        sb.append(" in settings.gradle");
+
+        return sb.toString();
+    }
+
+    private static final Logger _log = Logger.getLogger(
+        UpdateSettingsGradle.class.getName());
+
+    private static final String _pluginId =
+        "com.liferay.gradle.plugins.workspace";
+
 }

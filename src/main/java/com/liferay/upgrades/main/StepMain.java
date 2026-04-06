@@ -5,6 +5,7 @@ import com.liferay.upgrades.main.util.StepOptionsUtil;
 import com.liferay.upgrades.project.dependency.Step;
 import com.liferay.upgrades.project.dependency.docker.UpdateDockerCompose;
 import com.liferay.upgrades.project.dependency.gradle.UpdateGradleProperties;
+import com.liferay.upgrades.project.dependency.gradle.UpdateSettingsGradle;
 import com.liferay.upgrades.project.dependency.model.VersionOptions;
 
 import java.util.LinkedHashMap;
@@ -72,10 +73,13 @@ public class StepMain {
             UpdateGradleProperties::new);
 
         _STEPS_SUPPLIERS.put(
-                UpdateDockerCompose.class.getSimpleName(),
-                UpdateDockerCompose::new);
-    }
+            UpdateDockerCompose.class.getSimpleName(),
+            UpdateDockerCompose::new);
 
+        _STEPS_SUPPLIERS.put(
+            UpdateSettingsGradle.class.getSimpleName(),
+            UpdateSettingsGradle::new);
+        }
     private static final Logger _log = Logger.getLogger(StepMain.class.getName());
 
 }
