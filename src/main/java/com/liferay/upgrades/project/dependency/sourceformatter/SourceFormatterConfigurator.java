@@ -1,14 +1,47 @@
 package com.liferay.upgrades.project.dependency.sourceformatter;
 
+import com.liferay.upgrades.project.dependency.Step;
+import com.liferay.upgrades.project.dependency.model.Context;
+import com.liferay.upgrades.project.dependency.model.VersionOptions;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class SourceFormatterConfigurator {
+public class SourceFormatterConfigurator implements Step {
 
-    public void configureSourceFormatter(String directory, String targetRelease) throws Exception {
+    @Override
+    public Context applyChanges(VersionOptions stepOptions) throws Exception {
+        String directory = stepOptions.directory;
+        String targetRelease = stepOptions.targetRelease;
+
+        if (targetRelease == null || targetRelease.isEmpty()) {
+            _log.warning("No target-release provided. Skipping SourceFormatter configuration.");
+            return null;
+        }
+
+        _configureSourceFormatter(directory, targetRelease);
+        _updateGradleProperties(directory);
+
+        return new Context(
+            stepOptions.ticket, null, directory, null, null, null,
+            targetRelease, null);
+    }
+
+    @Override
+    public String commitMessage(Context context) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(context.ticket());
+        sb.append(" Workspace: Configure source-formatter.properties for ");
+        sb.append(context.targetRelease());
+
+        return sb.toString();
+    }
+
+    private void _configureSourceFormatter(String directory, String targetRelease) throws Exception {
         File file = new File(directory, "source-formatter.properties");
 
         if (!file.exists()) {
@@ -47,7 +80,7 @@ public class SourceFormatterConfigurator {
         }
     }
 
-    public void updateGradleProperties(String directory) throws Exception {
+    private void _updateGradleProperties(String directory) throws Exception {
         File file = new File(directory, "gradle.properties");
 
         String propertyToAdd = "com.liferay.source.formatter.version=latest.release";
@@ -57,21 +90,19 @@ public class SourceFormatterConfigurator {
 
             boolean exists = lines.stream().anyMatch(line -> line.contains("com.liferay.source.formatter.version"));
 
-                if (!exists) {
-                    String entry = "\n" + propertyToAdd + "\n";
+            if (!exists) {
+                String entry = "\n" + propertyToAdd + "\n";
 
-                    Files.write(file.toPath(), entry.getBytes(), StandardOpenOption.APPEND);
+                Files.write(file.toPath(), entry.getBytes(), StandardOpenOption.APPEND);
 
-                    _log.info("Added source formatter version to gradle.properties");
-                } else {
-                    _log.info("Source formatter version already defined in gradle.properties.");
-                }
+                _log.info("Added source formatter version to gradle.properties");
+            } else {
+                _log.info("Source formatter version already defined in gradle.properties.");
             }
         }
-
-
-
-        private static final Logger _log = Logger.getLogger(SourceFormatterConfigurator.class.getName());
     }
+
+    private static final Logger _log = Logger.getLogger(SourceFormatterConfigurator.class.getName());
+}
 
 

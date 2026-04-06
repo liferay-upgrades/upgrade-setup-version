@@ -7,6 +7,7 @@ import com.liferay.upgrades.project.dependency.bnd.BndRefactorer;
 import com.liferay.upgrades.project.dependency.docker.UpdateDockerCompose;
 import com.liferay.upgrades.project.dependency.gradle.*;
 import com.liferay.upgrades.project.dependency.model.VersionOptions;
+import com.liferay.upgrades.project.dependency.sourceformatter.SourceFormatterConfigurator;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,18 +23,64 @@ import java.util.logging.Logger;
 public class StepMain {
 
     public static void main(String[] args) {
-        VersionOptions stepOptions =
-            StepOptionsUtil.resolveOptions(args);
-
         try {
+            VersionOptions stepOptions =
+                StepOptionsUtil.resolveOptions(args);
+
+            if (stepOptions.targetRelease == null ||
+                stepOptions.targetRelease.isEmpty()) {
+
+                stepOptions.targetRelease = _deriveVersion(
+                    stepOptions.liferayVersion);
+
+                _log.info(
+                    "Derived target-release: " + stepOptions.targetRelease);
+            }
+
+            if (stepOptions.targetRelease.endsWith("-lts")) {
+                stepOptions.targetRelease = stepOptions.targetRelease.substring(
+                    0, stepOptions.targetRelease.length() - 4);
+
+                _log.info(
+                    "Removed -lts from target-release: " +
+                        stepOptions.targetRelease);
+            }
+
+            if (stepOptions.dockerCompose == null ||
+                stepOptions.dockerCompose.isEmpty()) {
+
+                stepOptions.dockerCompose = _deriveVersion(
+                    stepOptions.liferayVersion);
+
+                _log.info(
+                    "Derived docker-compose: " + stepOptions.dockerCompose);
+            }
+
             _executeSteps(stepOptions);
         }
         catch (Exception exception) {
             if (exception instanceof ParameterException) {
                 _log.info(_generateOptionsHelp());
             }
-            else throw new RuntimeException(exception);
+            else {
+                throw new RuntimeException(exception);
+            }
         }
+    }
+
+    private static String _deriveVersion(String liferayVersion) {
+        if (liferayVersion == null || liferayVersion.isEmpty()) {
+            return "";
+        }
+
+        if (liferayVersion.startsWith("dxp-")) {
+            return liferayVersion.substring(4);
+        }
+        else if (liferayVersion.startsWith("portal-")) {
+            return liferayVersion.substring(7);
+        }
+
+        return liferayVersion;
     }
 
     private static void _executeSteps(VersionOptions options)
@@ -99,8 +146,13 @@ public class StepMain {
         _STEPS_SUPPLIERS.put(
             BndRefactorer.class.getSimpleName(),
             BndRefactorer::new);
-        }
 
-    private static final Logger _log = Logger.getLogger(StepMain.class.getName());
+        _STEPS_SUPPLIERS.put(
+            SourceFormatterConfigurator.class.getSimpleName(),
+            SourceFormatterConfigurator::new);
+    }
+
+    private static final Logger _log = Logger.getLogger(
+        StepMain.class.getName());
 
 }
