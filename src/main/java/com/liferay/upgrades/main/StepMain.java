@@ -163,6 +163,10 @@ public class StepMain {
         _STEPS_SUPPLIERS.put(
             BuildRestRefactorer.class.getSimpleName(),
             BuildRestRefactorer::new);
+
+        _STEPS_SUPPLIERS.put(
+            JakartaUpgradeRunner.class.getSimpleName(),
+            JakartaUpgradeRunner::new);
     }
 
     private static final Logger _log = Logger.getLogger(
