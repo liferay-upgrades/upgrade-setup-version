@@ -19,7 +19,14 @@ public class BuildServiceRefactorer implements Step {
 
     @Override
     public String commitMessage(Context context) {
-        return "";
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(context.ticket());
+        sb.append(" buildService in ");
+        sb.append(context.targetRelease());
+        sb.append(" module");
+
+        return sb.toString();
     }
 
     @Override
@@ -31,19 +38,26 @@ public class BuildServiceRefactorer implements Step {
         GitHandler gitHandler = new GitHandler();
 
         for (File module : serviceModules) {
-            _runBuildService(module.getAbsolutePath());
+            Context context = _applyChanges(stepOptions, module);
 
-            StringBuilder sb = new StringBuilder();
-
-            sb.append(stepOptions.ticket);
-            sb.append(" buildService in ");
-            sb.append(module.getName());
-            sb.append(" module");
-
-            gitHandler.commit(directory, sb.toString());
+            gitHandler.commit(directory, commitMessage(context));
         }
 
         return null;
+    }
+
+    private Context _applyChanges(VersionOptions stepOptions, File module)
+        throws Exception {
+
+        String modulePath = module.getAbsolutePath();
+
+        _log.info("Running buildService in " + modulePath);
+
+        _executeShell(modulePath, "blade gw buildService");
+
+        return new Context(
+            stepOptions.ticket, null, stepOptions.directory, null, null, null,
+            module.getName(), null);
     }
 
     private List<File> _findServiceModules(String directory) {
@@ -81,12 +95,6 @@ public class BuildServiceRefactorer implements Step {
                 serviceModules.add(file.getParentFile());
             }
         }
-    }
-
-    private void _runBuildService(String modulePath) throws Exception {
-        _log.info("Running buildService in " + modulePath);
-
-        _executeShell(modulePath, "blade gw buildService");
     }
 
     private void _executeShell(String directory, String command)
