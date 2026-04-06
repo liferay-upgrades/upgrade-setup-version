@@ -151,13 +151,17 @@ public class StepMain {
         _STEPS_SUPPLIERS.put(
             SourceFormatterConfigurator.class.getSimpleName(),
             SourceFormatterConfigurator::new);
+
+        _STEPS_SUPPLIERS.put(
+            SourceFormatterRunner.class.getSimpleName(),
+            SourceFormatterRunner::new);
+
+        _STEPS_SUPPLIERS.put(
+            BuildServiceRefactorer.class.getSimpleName(),
+            BuildServiceRefactorer::new);
     }
 
     private static final Logger _log = Logger.getLogger(
-        StepMain.class.getName());
-
-}
-ger(
         StepMain.class.getName());
 
 }
