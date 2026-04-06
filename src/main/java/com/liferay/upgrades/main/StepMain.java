@@ -8,6 +8,7 @@ import com.liferay.upgrades.project.dependency.docker.UpdateDockerCompose;
 import com.liferay.upgrades.project.dependency.gradle.*;
 import com.liferay.upgrades.project.dependency.model.VersionOptions;
 import com.liferay.upgrades.project.dependency.sourceformatter.SourceFormatterConfigurator;
+import com.liferay.upgrades.project.dependency.sourceformatter.SourceFormatterRunner;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -153,6 +154,10 @@ public class StepMain {
     }
 
     private static final Logger _log = Logger.getLogger(
+        StepMain.class.getName());
+
+}
+ger(
         StepMain.class.getName());
 
 }
