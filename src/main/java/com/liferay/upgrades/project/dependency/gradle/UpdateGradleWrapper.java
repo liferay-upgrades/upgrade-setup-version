@@ -1,6 +1,9 @@
 package com.liferay.upgrades.project.dependency.gradle;
 
-import java.io.File;
+import com.liferay.upgrades.project.dependency.Step;
+import com.liferay.upgrades.project.dependency.model.Context;
+import com.liferay.upgrades.project.dependency.model.VersionOptions;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -8,14 +11,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class UpdateGradleWrapper {
+public class UpdateGradleWrapper implements Step {
 
-    public String run(String directory, String gradleVersion) throws Exception {
+    @Override
+    public Context applyChanges(VersionOptions stepOptions) throws Exception {
+        String gradleVersion = stepOptions.gradleVersion;
+        String directory = stepOptions.directory;
 
-        Path path = Paths.get(directory, "gradle", "wrapper", "gradle-wrapper.properties");
+        if (gradleVersion == null) {
+            _log.info("Skipping UpdateGradleWrapper: gradle-version not provided.");
+            return null;
+        }
+
+        Path path = Paths.get(
+            directory, "gradle", "wrapper", "gradle-wrapper.properties");
 
         if (!Files.exists(path)) {
-            _log.warning("gradle-wrapper.properties not found at: " + path.toAbsolutePath() + ". Skipping");
+            _log.warning(
+                "gradle-wrapper.properties not found at: " +
+                    path.toAbsolutePath() + ". Skipping");
+
             return null;
         }
 
@@ -25,35 +40,59 @@ public class UpdateGradleWrapper {
 
         String oldVersion = "unknown";
         boolean found = false;
+        boolean changed = false;
 
-        for (String line: lines) {
-
+        for (String line : lines) {
             String trimmedLine = line.trim();
 
             if (trimmedLine.startsWith(_distUrlKey)) {
-
                 oldVersion = _extractVersion(trimmedLine);
 
                 if (oldVersion.equals(gradleVersion)) {
-                    _log.info("Gradle version is already " + gradleVersion + ". Skipping update.");
+                    _log.info(
+                        "Gradle version is already " + gradleVersion +
+                            ". Skipping update.");
+
                     return null;
                 }
 
-                String newUrl = "https\\://services.gradle.org/distributions/gradle-" + gradleVersion + "-bin.zip";
+                String newUrl =
+                    "https\\://services.gradle.org/distributions/gradle-" +
+                        gradleVersion + "-bin.zip";
 
                 updatedLines.add(_distUrlKey + newUrl);
                 found = true;
-                _log.info("Updating Gradle Wrapper distributionUrl to version " + gradleVersion);
-            } else {
+                changed = true;
+                _log.info(
+                    "Updating Gradle Wrapper distributionUrl to version " +
+                        gradleVersion);
+            }
+            else {
                 updatedLines.add(line);
             }
         }
 
-        if (found) {
+        if (changed) {
             Files.write(path, updatedLines);
+
+            return new Context(
+                stepOptions.ticket, null, directory, gradleVersion, null,
+                oldVersion, null, null);
         }
 
-        return oldVersion;
+        return null;
+    }
+
+    @Override
+    public String commitMessage(Context context) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(context.ticket());
+        sb.append(" Update distributionUrl to Gradle ");
+        sb.append(context.gradleVersion());
+        sb.append(" in gradle-wrapper.properties");
+
+        return sb.toString();
     }
 
     private String _extractVersion(String line) {
@@ -61,11 +100,15 @@ public class UpdateGradleWrapper {
             int start = line.indexOf("gradle-") + 7;
             int end = line.indexOf("-", start);
             return line.substring(start, end);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             return "unknown";
         }
     }
 
     private static final String _distUrlKey = "distributionUrl=";
-    private static final Logger _log = Logger.getLogger(UpdateGradleWrapper.class.getName());
+
+    private static final Logger _log = Logger.getLogger(
+        UpdateGradleWrapper.class.getName());
+
 }
