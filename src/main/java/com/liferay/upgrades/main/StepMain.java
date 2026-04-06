@@ -4,9 +4,7 @@ import com.beust.jcommander.ParameterException;
 import com.liferay.upgrades.main.util.StepOptionsUtil;
 import com.liferay.upgrades.project.dependency.Step;
 import com.liferay.upgrades.project.dependency.docker.UpdateDockerCompose;
-import com.liferay.upgrades.project.dependency.gradle.UpdateGradleProperties;
-import com.liferay.upgrades.project.dependency.gradle.UpdateGradleWrapper;
-import com.liferay.upgrades.project.dependency.gradle.UpdateSettingsGradle;
+import com.liferay.upgrades.project.dependency.gradle.*;
 import com.liferay.upgrades.project.dependency.model.VersionOptions;
 
 import java.util.LinkedHashMap;
@@ -84,8 +82,19 @@ public class StepMain {
         _STEPS_SUPPLIERS.put(
             UpdateGradleWrapper.class.getSimpleName(),
             UpdateGradleWrapper::new);
-        }
 
+        _STEPS_SUPPLIERS.put(
+            BuildGradleTaskRefactorer.class.getSimpleName(),
+            BuildGradleTaskRefactorer::new);
+
+        _STEPS_SUPPLIERS.put(
+            BuildGradlePortalApiRefactorer.class.getSimpleName(),
+            BuildGradlePortalApiRefactorer::new);
+
+        _STEPS_SUPPLIERS.put(
+            BuildGradleCompatibilityRefactorer.class.getSimpleName(),
+            BuildGradleCompatibilityRefactorer::new);
+        }
     private static final Logger _log = Logger.getLogger(StepMain.class.getName());
 
 }
