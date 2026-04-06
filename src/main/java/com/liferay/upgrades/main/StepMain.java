@@ -159,6 +159,10 @@ public class StepMain {
         _STEPS_SUPPLIERS.put(
             BuildServiceRefactorer.class.getSimpleName(),
             BuildServiceRefactorer::new);
+
+        _STEPS_SUPPLIERS.put(
+            BuildRestRefactorer.class.getSimpleName(),
+            BuildRestRefactorer::new);
     }
 
     private static final Logger _log = Logger.getLogger(
