@@ -1,5 +1,6 @@
 package com.liferay.upgrades.main;
 
+import com.beust.jcommander.ParameterException;
 import com.liferay.upgrades.main.util.StepOptionsUtil;
 import com.liferay.upgrades.project.dependency.Step;
 import com.liferay.upgrades.project.dependency.gradle.UpdateGradleProperties;
@@ -9,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 /**
  * @author Albert Gomes Cabral
@@ -25,7 +27,10 @@ public class StepMain {
             _executeSteps(stepOptions);
         }
         catch (Exception exception) {
-            throw new RuntimeException(exception);
+            if (exception instanceof ParameterException) {
+                _log.info(_generateOptionsHelp());
+            }
+            else throw new RuntimeException(exception);
         }
     }
 
@@ -44,6 +49,19 @@ public class StepMain {
         }
     }
 
+    private static String _generateOptionsHelp() {
+        return """
+                The available options are:
+                \t--ticket or -t to set the Jira ticket ID (Required)
+                \t--plugin-version or -p to set the new Liferay workspace plugin version
+                \t--gradle-version or -g to Set the new Gradle version
+                \t--liferay-version or -l to set the new Liferay upgrade version (Required)
+                \t--docker-compose or -d to set the new image liferay version in docker compose
+                \t--folder or -f to specify the path for the liferay workspace (Required)
+                \t--target-release or -tr to Set the target release for source-formatter
+               """;
+    }
+
     private static final Map<String, Supplier<Step>> _STEPS_SUPPLIERS =
         new LinkedHashMap<>();
 
@@ -53,4 +71,5 @@ public class StepMain {
             UpdateGradleProperties::new);
     }
 
+    private static final Logger _log = Logger.getLogger(StepMain.class.getName());
 }
