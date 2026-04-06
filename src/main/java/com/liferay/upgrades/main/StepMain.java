@@ -3,6 +3,7 @@ package com.liferay.upgrades.main;
 import com.beust.jcommander.ParameterException;
 import com.liferay.upgrades.main.util.StepOptionsUtil;
 import com.liferay.upgrades.project.dependency.Step;
+import com.liferay.upgrades.project.dependency.docker.UpdateDockerCompose;
 import com.liferay.upgrades.project.dependency.gradle.UpdateGradleProperties;
 import com.liferay.upgrades.project.dependency.model.VersionOptions;
 
@@ -69,7 +70,12 @@ public class StepMain {
         _STEPS_SUPPLIERS.put(
             UpdateGradleProperties.class.getSimpleName(),
             UpdateGradleProperties::new);
+
+        _STEPS_SUPPLIERS.put(
+                UpdateDockerCompose.class.getSimpleName(),
+                UpdateDockerCompose::new);
     }
 
     private static final Logger _log = Logger.getLogger(StepMain.class.getName());
+
 }
