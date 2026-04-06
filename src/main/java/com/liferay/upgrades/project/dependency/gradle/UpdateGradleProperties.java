@@ -104,7 +104,7 @@ public class UpdateGradleProperties implements Step {
 
             return new Context(
                     stepOptions.ticket, null, directory,
-                    newVersion, null, oldVersion, null);
+                    newVersion, null, oldVersion, null, null);
         }
 
         return null;

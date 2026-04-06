@@ -80,7 +80,7 @@ public class UpdateDockerCompose implements Step {
 
             return new Context(
                 stepOptions.ticket, null, directory, null, newVersion, null,
-                oldTag);
+                oldTag, null);
         }
 
         return null;
