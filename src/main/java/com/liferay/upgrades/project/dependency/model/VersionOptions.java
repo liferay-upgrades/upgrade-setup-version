@@ -16,15 +16,13 @@ public class VersionOptions {
 
     @Parameter(
         names = {"-p", "--plugin-version"},
-        description = "Set the new liferay workspace plugin version",
-        required = true
+        description = "Set the new liferay workspace plugin version"
     )
     public String pluginsVersion;
 
     @Parameter(
         names = {"-g", "--gradle-version"},
-        description = "Set the new Gradle version)",
-        required = true
+        description = "Set the new Gradle version)"
     )
     public String gradleVersion;
 
@@ -50,8 +48,7 @@ public class VersionOptions {
 
     @Parameter(
         names = {"-tr", "--target-release"},
-        description = "Set the target release for source-formatter",
-        required = true
+        description = "Set the target release for source-formatter"
     )
     public String targetRelease;
 
