@@ -52,4 +52,16 @@ public class VersionOptions {
     )
     public String targetRelease;
 
+    @Parameter(
+        names = {"-gr", "--github-repo"},
+        description = "Specify the GitHub repository to send a PR"
+    )
+    public String githubRepo;
+
+    @Parameter(
+        names = {"-bb", "--base-branch"},
+        description = "Specify the base branch for the PR"
+    )
+    public String baseBranch;
+
 }
