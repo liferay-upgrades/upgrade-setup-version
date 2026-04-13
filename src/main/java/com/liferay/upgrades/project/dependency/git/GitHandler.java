@@ -3,6 +3,7 @@ package com.liferay.upgrades.project.dependency.git;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class GitHandler {
@@ -22,6 +23,32 @@ public class GitHandler {
 
     }
 
+    public void createBranch(String directory, String branchName) throws Exception {
+        _executeCommand(directory, "git", "checkout", "-B", branchName);
+        _log.info("Created and switched to branch: " + branchName);
+    }
+
+    public void push(String directory, String remote, String branch) throws Exception {
+        _executeCommand(directory, "git", "push", "-u", remote, branch);
+        _log.info("Git push successful to " + remote + " " + branch);
+    }
+
+    public void createPullRequest(
+            String directory, String repo, String head, String base,
+            String title, String body)
+        throws Exception {
+
+        _executeCommand(
+            directory, "gh", "pr", "create", "--repo", repo, "--head", head,
+            "--base", base, "--title", title, "--body", body);
+
+        _log.info("Pull Request created successfully for " + repo);
+    }
+
+    public void setGhToken(String ghToken) {
+        _ghToken = ghToken;
+    }
+
     private boolean _hasStagedChanges(String directory) throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder("git", "diff", "--cached", "--quiet");
 
@@ -38,6 +65,12 @@ public class GitHandler {
         ProcessBuilder processBuilder = new ProcessBuilder(command);
 
         processBuilder.directory(Paths.get(directory).toFile());
+
+        Map<String, String> environment = processBuilder.environment();
+
+        if (_ghToken != null) {
+            environment.put("GH_TOKEN", _ghToken);
+        }
 
         processBuilder.redirectErrorStream(true);
 
@@ -58,6 +91,8 @@ public class GitHandler {
         }
 
     }
+
+    private String _ghToken;
 
     private static final Logger _log = Logger.getLogger(GitHandler.class.getName());
 }
