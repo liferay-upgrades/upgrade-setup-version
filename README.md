@@ -12,8 +12,29 @@ To run this tool, you need:
 - **Java 11+** (JDK)
 - **Gradle** (or use the provided `./gradlew` wrapper)
 - **Liferay Blade CLI** (installed and available in the system PATH)
+- **GitHub CLI (`gh`)** (installed and authenticated)
 - **Git** (configured in the target workspace)
 - **Linux/macOS environment** (uses shell commands like `sed`, `grep`, and `find`)
+
+## GitHub Authentication
+
+To use the automated Pull Request creation feature, the tool requires a GitHub Personal Access Token (PAT).
+
+### 1. Generate a Token
+You can generate a token in your GitHub account:
+1. Go to [GitHub Settings > Developer settings > Personal access tokens > Tokens (classic)](https://github.com/settings/tokens).
+2. Click **Generate new token (classic)**.
+3. Give it a name and select the `repo` scope (required to create Pull Requests).
+4. Copy the generated token.
+
+### 2. Configure the Tool
+Create a `.env` file in the tool's root directory or in your target workspace folder and add your token:
+
+```text
+GH_TOKEN=your_personal_access_token_here
+```
+
+The tool will automatically detect this file and use the token to authenticate the `gh` commands.
 
 ## Automated Steps
 
@@ -32,8 +53,9 @@ The tool performs the following 13 steps in order:
 11. **Build Service**: Runs `blade gw buildService` for any module containing `service.xml`.
 12. **Build REST**: Runs `blade gw buildRest` for any module containing `rest-config.yaml`.
 13. **Jakarta EE Upgrade**: Executes `blade gw upgradeJakarta` for modern Liferay versions (DXP 2025.Q3+).
+14. **Push and Create Pull Request**: Pushes the current branch to `origin` and creates a Pull Request on GitHub using the `gh` CLI.
 
-*Note: Each step is followed by an atomic Git commit using a standardized message pattern.*
+*Note: Each step is followed by an atomic Git commit using a standardized message pattern (except for the PR step).*
 
 ## How to Run
 
@@ -77,6 +99,8 @@ usv \
 | `--target-release` | `-tr` | Target release (Derived from `-l` if omitted) | No |
 | `--gradle-version` | `-g` | New Gradle version (e.g., `8.5`) | No |
 | `--docker-compose` | `-d` | New Docker image tag (Derived from `-l` if omitted) | No |
+| `--github-repo` | `-gr` | Specify the GitHub repository to send a PR | No |
+| `--base-branch` | `-bb` | Specify the base branch for the PR (Defaults to `master`) | No |
 
 ## Project Structure
 
