@@ -5,6 +5,8 @@ import com.liferay.upgrades.main.util.StepOptionsUtil;
 import com.liferay.upgrades.project.dependency.Step;
 import com.liferay.upgrades.project.dependency.bnd.BndRefactorer;
 import com.liferay.upgrades.project.dependency.docker.UpdateDockerCompose;
+import com.liferay.upgrades.project.dependency.git.GitSetupStep;
+import com.liferay.upgrades.project.dependency.git.PullRequestStep;
 import com.liferay.upgrades.project.dependency.gradle.*;
 import com.liferay.upgrades.project.dependency.jakarta.JakartaUpgradeRunner;
 import com.liferay.upgrades.project.dependency.model.VersionOptions;
@@ -105,6 +107,7 @@ public class Main {
                 \t--docker-compose or -d to set the new image liferay version in docker compose
                 \t--folder or -f to specify the path for the liferay workspace (Required)
                 \t--target-release or -tr to Set the target release for source-formatter
+                \t--github-repo or -gr to specify the GitHub repository to send a PR
                """;
     }
 
@@ -112,6 +115,10 @@ public class Main {
         new LinkedHashMap<>();
 
     static {
+        _STEPS_SUPPLIERS.put(
+            GitSetupStep.class.getSimpleName(),
+            GitSetupStep::new);
+
         _STEPS_SUPPLIERS.put(
             UpdateGradleProperties.class.getSimpleName(),
             UpdateGradleProperties::new);
@@ -163,6 +170,10 @@ public class Main {
         _STEPS_SUPPLIERS.put(
             JakartaUpgradeRunner.class.getSimpleName(),
             JakartaUpgradeRunner::new);
+
+        _STEPS_SUPPLIERS.put(
+            PullRequestStep.class.getSimpleName(),
+            PullRequestStep::new);
     }
 
     private static final Logger _log = Logger.getLogger(
