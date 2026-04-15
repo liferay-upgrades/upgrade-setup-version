@@ -29,7 +29,7 @@ public class GitHandler {
     }
 
     public void push(String directory, String remote, String branch) throws Exception {
-        _executeCommand(directory, "git", "push", "-u", remote, branch);
+        _executeCommand(directory, "git", "push", "-f", "-u", remote, branch);
         _log.info("Git push successful to " + remote + " " + branch);
     }
 
