@@ -11,6 +11,7 @@ import com.liferay.upgrades.project.dependency.gradle.*;
 import com.liferay.upgrades.project.dependency.jakarta.JakartaUpgradeRunner;
 import com.liferay.upgrades.project.dependency.model.VersionOptions;
 import com.liferay.upgrades.project.dependency.sourceformatter.SourceFormatterConfigurator;
+import com.liferay.upgrades.project.dependency.sourceformatter.SourceFormatterCSVRunner;
 import com.liferay.upgrades.project.dependency.sourceformatter.SourceFormatterRunner;
 
 import java.util.LinkedHashMap;
@@ -108,6 +109,7 @@ public class Main {
                 \t--folder or -f to specify the path for the liferay workspace (Required)
                 \t--target-release or -tr to Set the target release for source-formatter
                 \t--github-repo or -gr to specify the GitHub repository to send a PR
+                \t--csv or -c to specify the CSV file path for module dependency order
                """;
     }
 
@@ -170,6 +172,10 @@ public class Main {
         _STEPS_SUPPLIERS.put(
             JakartaUpgradeRunner.class.getSimpleName(),
             JakartaUpgradeRunner::new);
+
+        _STEPS_SUPPLIERS.put(
+            SourceFormatterCSVRunner.class.getSimpleName(),
+            SourceFormatterCSVRunner::new);
 
         _STEPS_SUPPLIERS.put(
             PullRequestStep.class.getSimpleName(),
