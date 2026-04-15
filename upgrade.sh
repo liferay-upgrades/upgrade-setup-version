@@ -30,6 +30,7 @@ DOCKER_COMPOSE=$(ask_variable "Enter new Docker image version (Optional)" "false
 TARGET_RELEASE=$(ask_variable "Enter target release for source-formatter (Optional)" "false")
 GITHUB_REPO=$(ask_variable "Enter GitHub repository for PR (Optional)" "false")
 BASE_BRANCH=$(ask_variable "Enter the base branch for the PR (Optional)" "false")
+CSV_PATH=$(ask_variable "Enter CSV file path for module dependency order (Optional)" "false")
 
 # Build the JAR
 echo ""
@@ -66,6 +67,10 @@ fi
 
 if [ -n "$BASE_BRANCH" ]; then
     CMD="$CMD -bb \"$BASE_BRANCH\""
+fi
+
+if [ -n "$CSV_PATH" ]; then
+    CMD="$CMD -c \"$CSV_PATH\""
 fi
 
 echo ""
