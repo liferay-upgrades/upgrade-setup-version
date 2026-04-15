@@ -64,4 +64,10 @@ public class VersionOptions {
     )
     public String baseBranch;
 
+    @Parameter(
+        names = {"-c", "--csv"},
+        description = "Specify the CSV file path for module dependency order"
+    )
+    public String csv;
+
 }
